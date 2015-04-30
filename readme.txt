@@ -25,7 +25,7 @@ With this plugin You can hide all Wordpress elements. Even for human it will be 
 * media
 * make internal links relative 
 
-= Example sites with SuperSonic plugin - check how fast they loading =
+= Example site with Hide WP plugin =
 * [Site 1](http://www.wp-supersonic.com/ "www.wp-supersonic.com")
  
 == Installation ==
