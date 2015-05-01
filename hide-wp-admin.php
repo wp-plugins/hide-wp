@@ -313,6 +313,11 @@ EOD;
   		flush_rewrite_rules();
 	  }
 	  if ($tab == 'header') {
+ 			$settings['header_generator'] = $_POST['header_generator'];
+  		$settings['header_hide_generator'] = '0';
+  		if (isset($_POST['header_hide_generator'])) {
+  			$settings['header_hide_generator'] = $_POST['header_hide_generator'];
+  		}
   		$settings['header_feed_links'] = '0';
   		if (isset($_POST['header_feed_links'])) {
   			$settings['header_feed_links'] = $_POST['header_feed_links'];
@@ -328,6 +333,10 @@ EOD;
   		$settings['header_pingback'] = '0';
   		if (isset($_POST['header_pingback'])) {
   			$settings['header_pingback'] = $_POST['header_pingback'];
+  		}
+  		$settings['header_x_pingback'] = '0';
+  		if (isset($_POST['header_x_pingback'])) {
+  			$settings['header_x_pingback'] = $_POST['header_x_pingback'];
   		}
   		$this->hide_wp->save_options($settings);
   		flush_rewrite_rules();
@@ -623,6 +632,20 @@ EOD;
 			<form id="hide_wp_settings" method="<?php echo $form_method; ?>" action="">
 				<table class="form-table">
         <tr>
+        <tr>
+        	<th><label for="header_generator">Change generator meta to:</label></th>
+            <td>
+               <input style="width:340px;" id="header_generator" name="header_generator" type="text" value="<?php echo $settings['header_generator']; ?>" /><br/>
+               <span class="description">Blank - do not change generator meta.</span>               
+            </td>
+        </tr>
+        	<th></th>
+            <td>
+               <input id="header_hide_generator" name="header_hide_generator" type="checkbox" value="1" <?php checked($settings['header_hide_generator'],'1',true); ?>/> <label for="header_hide_generator">Remove generator meta</label><br/>
+               <span class="description"></span>
+            </td>
+        </tr>
+        <tr>
         	<th></th>
             <td>
                <input id="header_feed_links" name="header_feed_links" type="checkbox" value="1" <?php checked($settings['header_feed_links'],'1',true); ?>/> <label for="header_feed_links">Remove feed links</label><br/>
@@ -647,6 +670,13 @@ EOD;
         	<th></th>
             <td>
                <input id="header_pingback" name="header_pingback" type="checkbox" value="1" <?php checked($settings['header_pingback'],'1',true); ?>/> <label for="header_pingback">Remove pingback URL</label><br/>
+               <span class="description"></span>
+            </td>
+        </tr>
+        <tr>
+        	<th></th>
+            <td>
+               <input id="header_x_pingback" name="header_x_pingback" type="checkbox" value="1" <?php checked($settings['header_x_pingback'],'1',true); ?>/> <label for="header_x_pingback">Remove X-Pingback header</label><br/>
                <span class="description"></span>
             </td>
         </tr>

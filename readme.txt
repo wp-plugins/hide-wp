@@ -4,7 +4,7 @@ Donate link: http://www.wp-supersonic.com/donate-hide-wp
 Tags: security, antyspam, spam, protect, save resources
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,10 @@ With this plugin You can hide all Wordpress elements. Even for human it will be 
 10. Other configuration
 
 == Changelog ==
+
+= 1.0.1 =
+* Added options for changing or hide generator meta tag
+* Added option for disable X-Pingback HTTP header
 
 = 1.0.0 =
 * Initial version

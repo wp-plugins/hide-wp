@@ -3,7 +3,7 @@
 Plugin Name: Hide WP
 Plugin URI: 
 Description: Hide Wordpress instalation and protect Wordpress files
-Version: 1.0.0
+Version: 1.0.1
 Author: Grzegorz Rola
 Author URI: 
 Text Domain: hide-wp
@@ -53,6 +53,16 @@ class Hide_WP {
 		add_filter('bloginfo_url',array($this,'bloginfo_url'), 10, 2 );
 		add_filter('cron_request',array($this,'cron_request'), 10, 1 );		
 		//
+		add_filter('get_the_generator_html',array($this,'get_the_generator'), 10, 2 );		
+		add_filter('get_the_generator_xhtml',array($this,'get_the_generator'), 10, 2 );		
+		add_filter('get_the_generator_atom',array($this,'get_the_generator'), 10, 2 );		
+		add_filter('get_the_generator_rss2',array($this,'get_the_generator'), 10, 2 );		
+		add_filter('get_the_generator_rdf',array($this,'get_the_generator'), 10, 2 );		
+		add_filter('get_the_generator_comment',array($this,'get_the_generator'), 10, 2 );		
+		add_filter('get_the_generator_export',array($this,'get_the_generator'), 10, 2 );		
+		//
+		add_filter('wp_headers', array($this,'remove_x_pingback'));
+		//
 		add_action('activated_plugin', array($this,'activated_plugin'), 10, 2 );
 		add_action('deactivated_plugin', array($this,'activated_plugin'), 10, 2 );
 		//
@@ -80,6 +90,9 @@ class Hide_WP {
 		if (isset($this->options['header_feed_rsd_link']) && $this->options['header_feed_rsd_link'] == '1') {
 			remove_action( 'wp_head', 'feed_rsd_link', 3 ); 
 		} 		
+		if (isset($this->options['header_hide_generator']) && $this->options['header_hide_generator'] == '1') {
+			remove_action('wp_head', 'wp_generator');
+		}
 	}
 	
 	public function plugin_slug($file) {
@@ -566,7 +579,7 @@ class Hide_WP {
 		}
 		if ($show == 'pingback_url' && isset($this->options['xmlrpc_url']) && trim($this->options['xmlrpc_url']) != '') {
 			$output = str_replace('xmlrpc.php',trim($this->options['xmlrpc_url']),$output);
-		}
+		}		
     if ($show == 'pingback_url' && isset($this->options['header_pingback']) && $this->options['header_pingback'] == '1') $output = '';
     return $output;
 	}
@@ -584,6 +597,36 @@ class Hide_WP {
 		}
 		error_log('cron='.serialize($cron_request_array));
 		return $cron_request_array;
+	}
+	
+	function get_the_generator($gen, $type) {
+		if ($this->disable_filters) {
+			return $gen;
+		}
+		if (isset($this->options['header_hide_generator']) && $this->options['header_hide_generator'] == '1') {
+			$gen = '';
+		}
+		else if (isset($this->options['header_generator']) && trim($this->options['header_hide_generator']) != '') {
+			$gen = str_replace('WordPress/'.get_bloginfo_rss('version'),$this->options['header_generator'],$gen);
+			$gen = str_replace('WordPress/'.get_bloginfo('version'),$this->options['header_generator'],$gen);
+			$gen = str_replace('http://wordpress.org/?v='.get_bloginfo_rss('version'),site_url(),$gen);
+			$gen = str_replace('http://wordpress.org/',site_url(),$gen);
+			$gen = str_replace('WordPress '.get_bloginfo('version'),$this->options['header_generator'],$gen);
+		}
+		return $gen;
+	}
+	
+	function remove_x_pingback($headers) {
+		if ($this->disable_filters) {
+			return $headers;
+		}
+		if (isset($this->options['header_x_pingback']) && $this->options['header_x_pingback'] == '1') {
+    	unset($headers['X-Pingback']);
+    }
+    else if (isset($this->options['xmlrpc_url']) && trim($this->options['xmlrpc_url']) != '') {
+    	$headers['X-Pingback'] = trailingslashit(site_url()).$this->options['xmlrpc_url'];
+    }
+    return $headers;
 	}
 	
 }
