@@ -3,8 +3,8 @@ Contributors: kursorA
 Donate link: http://www.wp-supersonic.com/donate-hide-wp
 Tags: security, antyspam, spam, protect, save resources
 Requires at least: 4.0
-Tested up to: 4.2
-Stable tag: 1.0.1
+Tested up to: 4.2.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,7 +26,7 @@ With this plugin You can hide all Wordpress elements. Even for human it will be 
 * make internal links relative 
 
 = Example site with Hide WP plugin =
-* [Site 1](http://www.wp-supersonic.com/ "www.wp-supersonic.com")
+* [Site 1](http://www.wp-supersonic.com/ "www.wp-supersonic.com") [Admin area](http://www.wp-supersonic.com/nc-admin/ "www.wp-supersonic.com/nc-admin/")
  
 == Installation ==
 
@@ -59,6 +59,7 @@ With this plugin You can hide all Wordpress elements. Even for human it will be 
 == Changelog ==
 
 = 1.0.2 =
+* Fixed bug in script and style sources (trailingslashit removed from src)
 * Rewrite configuration after theme switching
 
 = 1.0.1 =

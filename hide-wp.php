@@ -65,6 +65,7 @@ class Hide_WP {
 		//
 		add_action('activated_plugin', array($this,'activated_plugin'), 10, 2 );
 		add_action('deactivated_plugin', array($this,'activated_plugin'), 10, 2 );
+		add_action('after_switch_theme', 'after_switch_theme');
 		//
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
 		//
@@ -482,7 +483,7 @@ class Hide_WP {
 		}
 		if (isset($this->options['plugins'])) {
 			foreach ($this->options['plugins'] as $slug=>$path) {
-				$src = str_replace(trailingslashit(WP_PLUGIN_URL).$slug.'/','/'.$path.'/',trailingslashit($src));
+				$src = str_replace(trailingslashit(WP_PLUGIN_URL).$slug.'/','/'.$path.'/',$src);
 			}
 		}
 		if ((isset($this->options['plugins_relative']) && $this->options['plugins_relative'] =='1')) {
@@ -519,7 +520,7 @@ class Hide_WP {
 		}
 		if (isset($this->options['plugins'])) {
 			foreach ($this->options['plugins'] as $slug=>$path) {
-				$src = str_replace(trailingslashit(WP_PLUGIN_URL).$slug.'/','/'.$path.'/',trailingslashit($src));
+				$src = str_replace(trailingslashit(WP_PLUGIN_URL).$slug.'/','/'.$path.'/',$src);
 			}
 		}
 		if ((isset($this->options['plugins_relative']) && $this->options['plugins_relative'] =='1')) {
@@ -587,6 +588,10 @@ class Hide_WP {
 	function activated_plugin(  $plugin, $network_activation ) {
     flush_rewrite_rules();	
 	}
+	
+	function after_switch_theme() {
+    flush_rewrite_rules();	
+	}	
 	
 	function cron_request($cron_request_array) {
 		if ($this->disable_filters) {
