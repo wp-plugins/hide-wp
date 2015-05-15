@@ -4,7 +4,7 @@ Donate link: http://www.wp-supersonic.com/donate-hide-wp
 Tags: security, antyspam, spam, protect, save resources
 Requires at least: 4.0
 Tested up to: 4.2.1
-Stable tag: 1.0.2
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,15 @@ With this plugin You can hide all Wordpress elements. Even for human it will be 
 10. Other configuration
 
 == Changelog ==
+
+= 1.0.4 =
+* Changed login handling
+* Added default configuration for new installs
+
+= 1.0.3 =
+* Added W3 Total Cache support
+* Added message about Pretty Permalinks are required
+* Bug fixed in script and css sources
 
 = 1.0.2 =
 * Fixed bug in script and style sources (trailingslashit removed from src)

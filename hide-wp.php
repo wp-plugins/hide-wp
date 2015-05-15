@@ -3,7 +3,7 @@
 Plugin Name: Hide WP
 Plugin URI: 
 Description: Hide Wordpress instalation and protect Wordpress files
-Version: 1.0.2
+Version: 1.0.4
 Author: Grzegorz Rola
 Author URI: 
 Text Domain: hide-wp
@@ -45,6 +45,7 @@ class Hide_WP {
 		add_filter('wp_redirect',array($this,'wp_redirect'), 10, 2 );
 		add_action('auth_redirect',array($this,'auth_redirect'));
 		add_action('set_logged_in_cookie',array($this,'set_logged_in_cookie'), 10, 5);
+		add_action('set_auth_cookie',array($this,'set_auth_cookie'), 10, 5);
 		add_action('clear_auth_cookie',array($this,'clear_auth_cookie'));
 		add_filter('post_link',array($this,'post_link'), 10, 3 );
 		add_filter('post_type_link',array($this,'post_link'), 10, 3 );		
@@ -69,10 +70,14 @@ class Hide_WP {
 		//
 		remove_action( 'template_redirect', 'wp_redirect_admin_locations', 1000 );
 		//
+		if (isset($this->options['w3tc_can_print_comment']) && $this->options['w3tc_can_print_comment'] == '1') {
+			add_filter( 'w3tc_can_print_comment', function($w3tc_setting) {return false;},10,1);
+		}
 		//
 		global $compress_scripts, $concatenate_scripts;
 		$compress_scripts = 0;
 		$concatenate_scripts = false;
+		//
 	}
 
 	public static function instance() {
@@ -82,6 +87,11 @@ class Hide_WP {
 	}	
 	
 	function init() {
+		$permalink_structure = get_option('permalink_structure');
+		//		
+		if (!$permalink_structure || $permalink_structure == '') {
+			$this->disable();
+		}
 		if (isset($this->options['header_feed_links']) && $this->options['header_feed_links'] == '1') {
 			remove_action( 'wp_head', 'feed_links', 2 );
 		} 		
@@ -121,6 +131,54 @@ class Hide_WP {
 		if ($this->options == null) {
 			$this->options = get_option('hide-wp',array());
 		}
+		if (count($this->options) == 0) {
+			$this->options = array(
+				'header_generator' => site_url(),
+    		'header_hide_generator' => 0,
+    		'header_feed_links' => 1,
+		    'header_feed_links_extra' => 1,
+    		'header_rsd_link' => 1,
+    		'header_pingback' => 1,
+    		'header_x_pingback' => 1,
+    		'login_url' => '',
+    		'block_login_url' => 0,
+    		'register_url' => '',
+    		'lostpassword_url' => '',
+    		'admin_url' => '',
+    		'block_admin_url' => 0,
+    		'ajax_url' => '',
+    		'block_ajax_url' => 0,
+    		'includes_url' => '',
+    		'includes_relative' => 0,
+    		'block_includes_url' => 0,
+    		'plugins' => array(),
+		    'plugins_block' => array(),
+    		'block_plugins_url' => 1,
+    		'plugins_relative' => 0,
+    		'theme_url' => 'template',
+    		'style_url' => 'style.css',
+    		'style_dir_url' => 'css',
+    		'block_theme_url' => 1,
+    		'theme_relative' => 1,
+    		'media_url' => 'media',
+    		'media_relative' => 0,
+    		'block_media_url' => 1,
+    		'block_readme' => 1,
+		    'block_config' => 1,
+    		'block_activate' => 0,
+		    'block_opml' => 0,
+    		'block_blog_header' => 0,
+		    'cron_url' => '',
+    		'block_cron' => 0,
+		    'xmlrpc_url' => '',
+    		'block_xmlrpc' => 0,
+		    'mail_url' => '',
+    		'block_mail' => 0,
+		    'trackback_url' => '', 
+    		'block_trackback' => 0,
+    		'w3tc_can_print_comment' => 1
+    	);
+		}
 		return $this->options;
 	}
 	
@@ -142,6 +200,7 @@ class Hide_WP {
 	}
 
 	function set_logged_in_cookie($logged_in_cookie, $expire, $expiration, $user_id, $logged_in) {
+		return;
 		if (isset($this->options['admin_url']) && trim($this->options['admin_url'].' ') != '') {
 			if ( '' === $secure ) {
 				$secure = is_ssl();
@@ -158,6 +217,32 @@ class Hide_WP {
 			$token = $manager->create( $expiration );
 			$auth_cookie = wp_generate_auth_cookie( $user_id, $expiration, $scheme, $token );			
 			setcookie($auth_cookie_name, $auth_cookie, $expire, SITECOOKIEPATH.trim($this->options['admin_url'],'/'), COOKIE_DOMAIN, $secure, true);
+		}
+	}
+	
+	function set_auth_cookie($auth_cookie, $expire, $expiration, $user_id, $scheme) {
+		//error_log('set_auth_cookie');
+		if (isset($this->options['admin_url']) && trim($this->options['admin_url'].' ') != '') {
+			//error_log('set_auth_cookie');
+			if ( $scheme == 'secure_auth' ) {
+				$auth_cookie_name = SECURE_AUTH_COOKIE;
+				$secure = true;
+			} else {
+				$auth_cookie_name = AUTH_COOKIE;
+				$secure = false;
+			}		
+			setcookie($auth_cookie_name, $auth_cookie, $expire, SITECOOKIEPATH.trim($this->options['admin_url'],'/'), COOKIE_DOMAIN, $secure, true);
+			//error_log('auth_cookie_name='.$auth_cookie_name);
+			//error_log('auth_cookie='.$auth_cookie);
+			//error_log('expire='.$expire);
+			//error_log('path='.SITECOOKIEPATH.trim($this->options['admin_url'],'/'));
+			//error_log('domain='.COOKIE_DOMAIN);
+			//error_log('admin='.ADMIN_COOKIE_PATH);
+			//
+			$manager = WP_Session_Tokens::get_instance( $user_id );
+			$token = $manager->create( $expiration );
+			$logged_in_cookie = wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token );
+			//setcookie(LOGGED_IN_COOKIE, $logged_in_cookie, $expire, SITECOOKIEPATH.trim($this->options['admin_url'],'/'), COOKIE_DOMAIN, $secure, true);
 		}
 	}
 	
@@ -463,6 +548,9 @@ class Hide_WP {
 	}
 
 	function script_loader_src($src, $handle) {
+		if ($this->disable_filters) {
+			return $src;
+		}
 		if ((isset($this->options['theme_relative']) && $this->options['theme_relative'] =='1')) {
 			if ($this->theme_url && $this->theme_url_relative) {
 				$src = str_replace($this->theme_url,$this->theme_url_relative,$src);
@@ -497,6 +585,9 @@ class Hide_WP {
 	}
 	
 	function style_loader_src($src, $handle) {
+		if ($this->disable_filters) {
+			return $src;
+		}
 		if ((isset($this->options['theme_relative']) && $this->options['theme_relative'] =='1')) {
 			if ($this->theme_url && $this->theme_url_relative) {
 				$src = str_replace($this->theme_url,$this->theme_url_relative,$src);
@@ -600,7 +691,7 @@ class Hide_WP {
 		if (isset($this->options['cron_url']) && trim($this->options['cron_url']) != '') {
 			$cron_request_array['url'] = str_replace('wp-cron.php',trim(trim($this->options['cron_url']),'/').'',$cron_request_array['url']);
 		}
-		error_log('cron='.serialize($cron_request_array));
+		//error_log('cron='.serialize($cron_request_array));
 		return $cron_request_array;
 	}
 	

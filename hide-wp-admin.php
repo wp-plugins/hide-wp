@@ -20,7 +20,6 @@ class Hide_WP_Admin {
 	}	
 
 	public function admin_menu() {
-		error_log('admin_menu');
 		add_menu_page(__('Hide WP', 'hide-wp'), __('Hide WP', 'hide-wp'), 'manage_options', 'hide_wp', array($this,'config_handler'));
 	}
 	
@@ -46,6 +45,11 @@ class Hide_WP_Admin {
 		$subreq = rand(1,1000000);
 		$settings = $this->hide_wp->get_options();
 		if ($this->hide_wp->disabled()) {
+			return $rules;
+		}
+		//
+		$permalink_structure = get_option('permalink_structure');
+		if (!$permalink_structure || $permalink_structure == '') {
 			return $rules;
 		}
 		$this->hide_wp->disable();
@@ -309,6 +313,10 @@ EOD;
   		if (isset($_POST['term_permalink_relative'])) {
   			$settings['term_permalink_relative'] = $_POST['term_permalink_relative'];
   		}
+  		$settings['w3tc_can_print_comment'] = '0';
+  		if (isset($_POST['w3tc_can_print_comment'])) {
+  			$settings['w3tc_can_print_comment'] = $_POST['w3tc_can_print_comment'];
+  		}
   		$this->hide_wp->save_options($settings);
   		flush_rewrite_rules();
 	  }
@@ -436,6 +444,22 @@ EOD;
 	  echo '<div class="wrap">';
   	echo '<div id="icon-settings" class="icon32"><br></div>';
   	echo '<h2>Hide WP</h2>';
+		$permalink_structure = get_option('permalink_structure');
+		//		
+		if (!$permalink_structure || $permalink_structure == '') {
+   		?>
+			<div class="error">
+        <p><?php _e( 'Hide WP requires Pretty Permalinks to work!', 'hide-wp' ); ?></p>
+    	</div>   	
+    	<?php
+		}
+		if (defined('W3TC')) {
+			?>
+			<div class="updated">
+        <p><?php _e( 'There is W3 Total Cache installed. Make sure that option "Set W3 Total Cache header" in Browser Cache is disabled!', 'hide-wp' ); ?></p>
+    	</div>   	
+    	<?php
+		}
   	//
 		if ( $_POST["hide-wp-config-submit"] == 'Y' ) {
 			//echo 1;
@@ -617,6 +641,13 @@ EOD;
         	<th></th>
             <td>
                <input id="term_permalink_relative" name="term_permalink_relative" type="checkbox" value="1" <?php checked($settings['term_permalink_relative'],'1',true); ?>/> <label for="term_permalink_relative">Term permalink relative.</label><br/>
+               <span class="description"></span>
+            </td>
+        </tr>
+        <tr>
+        	<th></th>
+            <td>
+               <input id="w3tc_can_print_comment" name="w3tc_can_print_comment" type="checkbox" value="1" <?php checked($settings['w3tc_can_print_comment'],'1',true); ?>/> <label for="w3tc_can_print_comment">Disable W3 Total Cache (if installed) comment in page footer.</label><br/>
                <span class="description"></span>
             </td>
         </tr>
